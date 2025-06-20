@@ -1,0 +1,7 @@
+Sur les machines linux de Grenoble-INP Phelma
+
+Dans un terminal linux
+conda init
+
+puis fermer et ouvrir un terminal linux
+conda activate scicomp

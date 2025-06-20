@@ -1,0 +1,601 @@
+
+\documentclass[a4paper, 10pt]{article}
+\usepackage {amsmath}
+\usepackage{amsfonts}
+\usepackage{esint}
+\usepackage{a4wide}
+\usepackage {amsmath}
+\usepackage{amssymb}
+\usepackage {graphicx}
+\usepackage[utf8]{inputenc} 
+\usepackage[francais]{babel}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{extramarks}
+\usepackage{chngpage}
+\usepackage{soul}
+\usepackage{algorithmicx} 
+\usepackage{algpseudocode} 
+\usepackage{multicol}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{ifthen}
+\usepackage{listings}
+\usepackage{courier}
+\usepackage{esint}
+\usepackage{bbm}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{epsfig}
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage{braket}
+\usepackage{MnSymbol,wasysym}
+\usepackage{marvosym}
+\usepackage{dsfont}
+\usepackage{listings}
+\usepackage{color}
+
+
+\definecolor{MyGreen}{rgb}{0.,0.35,0.}
+
+    %%configuration de listings
+    \lstset{
+    language=c++,
+   xleftmargin=-20pt, 
+   xrightmargin=-20pt, 
+   frame=single,                           % Single frame around code
+    basicstyle=\ttfamily\small, %
+    identifierstyle=\color{black}, %
+    keywordstyle=\color{blue}, %
+    stringstyle=\color{black!60}, %
+    commentstyle=\color{MyGreen!100}, %
+    columns=fixed, %
+    tabsize=8, %
+    extendedchars=true, %
+    showspaces=false, %
+    showstringspaces=false, %
+    numbers=left, %
+    numberstyle=\tiny, %
+    breaklines=true, %
+    breakautoindent=true, %
+    captionpos=t
+    }
+
+% The first parameter is the label, which also is the name of the script
+% The second parameter is the optional caption.
+\newcommand{\insertlisting}[2]
+  {\begin{itemize}\item[]\lstinputlisting[caption=#2,label=#1]{#1}\end{itemize}}
+
+\newcommand{\norm}[1]{\lVert#1\rVert}
+
+\lhead{} 
+\chead{} 
+\rhead{\bfseries Algèbre Linéaire en Python} 
+\lfoot{J.-C. Toussaint - Phelma}
+%\cfoot{} 
+%\rfoot{\thepage}
+
+\pagestyle{fancy}
+
+\begin{document}
+
+
+\title{Algèbre Linéaire en Python}
+
+% \author{Quentin Rafhay - Jean-Christophe Toussaint\\
+%  Phelma\\
+%\texttt{jean-christophe.toussaint@phelma.grenoble-inp.fr}
+%}
+\date{\today}
+ 
+\maketitle
+
+
+\section{Résolution de systèmes d'équations linéaires}
+
+\subsection{Méthode de Gauss-Jordan}
+
+La méthode de Gauss-Jordan est une technique de résolution de systèmes d'équations linéaires:
+
+\begin{equation}
+\left(
+\begin{array}{c c c c}
+a_{0,0}   & a_{0,1}   & \cdots & a_{0,n-1} \\
+a_{1,0}   & a_{1,1}   & \cdots & a_{1,n-1} \\
+\vdots         & \vdots         & \ddots & \vdots \\
+a_{n-1,0} & a_{n-1,1} & \cdots & a_{n-1,n-1} 
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+x_0 \\ x_1 \\ \vdots \\ x_{n-1}
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+b_0 \\ b_1 \\ \vdots \\ b_{n-1}
+\end{array}
+\right)
+\end{equation}
+
+
+Elle consiste à transformer la matrice associée $A=(a_{ij})_{\; 0\leq i < n,\;  0\leq j < n }$ en une matrice unité en effectuant des combinaisons linéaires de lignes.
+Cette variante de la méthode de Gauss permet de calculer l'inverse d'une matrice.
+
+\subsection{Matrice augmentée}
+
+Soient $A$ et $B$ deux matrices  ayant le même nombre de lignes, on appelle matrice augmentée la matrice $(A | B)$ formée des deux blocs $A$ et $B$ mis côte à côte.
+
+Cette notion est très pratique lorsqu'on veut résoudre le système d'équations avec différents seconds
+membres. La matrice $B$ est alors construite en accollant à droite de $A$, les vecteurs colonnes formant les seconds membres.
+Elle se réduit naturellement à un vecteur dans le cas d'un seul second membre.
+
+\subsection{Algorithme de base sans changement de pivot (niveau *)}
+
+On augmente la matrice $A$ avec le(s) vecteur(s) colonne(s) du second membre.
+On vérifie que $\forall i,  a_{ii} \neq 0$ sinon effectue des échanges de lignes. 
+
+L'algorithme est itératif et s'effectue en $n$ étapes. A l'étape $k \in [0, n[$, on
+combine toutes les lignes sauf la ligne k pour faire apparaître des $0$ sur toute
+la colonne $k$ sauf au niveau du pivot $a_{kk}$.
+
+\begin{tabbing}
+\hspace{1cm}\= \hspace{1cm}\= \kill
+pour k=0 à n-1 \\
+\> diviser la ligne $k$ de la matrice $A$ par $a_{kk}$ \\
+\> pour i=0 à n-1 sauf k \\
+\> \> retrancher à la ligne i, la nouvelle ligne k multipliée par $a_{ik}$ \\
+\> fin pour i \\
+fin pour k \\
+\end{tabbing}
+
+Après résolution, la matrice $A$ apparait comme la concaténation de la matrice
+identité, accolée aux solutions $x$ du système.
+
+\subsection{Exemple pratique}
+
+Soit à résoudre:
+\[
+\left \{
+\begin{array}{l c r}
+2x+y-4z & = & 8 \\
+3x+3y-5z & = & 14 \\
+4x+5y-2z & = & 16 \\
+\end{array}
+\right .
+\]
+
+La matrice augmentée $A^{(0)}$ s'écrit :
+\begin{equation}
+A^{(0)}=
+\left(
+\begin{array}{c c c c }
+2  & 1   & -4  \\
+3  & 3   & -5   \\
+4  & 5  & -2  \\ 
+\end{array}
+\right|
+\left.
+\begin{array}{c}
+8  \\ 14   \\ 16  \\ 
+\end{array}
+\right)
+\end{equation}
+
+Divisons la première ligne par le pivot $a_{0,0}$ :
+$l_0 \leftarrow {1 \over 2} \times l_0$
+
+\begin{equation}
+A^{(1)}=
+\left(
+\begin{array}{c c c c }
+1  & {1/2}   & -2  \\
+0  &  {3/2}   & 1   \\
+0  & 3  & 6  \\ 
+\end{array}
+\right|
+\left.
+\begin{array}{c}
+4   \\ 2    \\ 0  \\ 
+\end{array}
+\right)
+\begin{array}{c}
+   \\ l_1 \leftarrow l_1 -3 \times l_0   \\ l_2 \leftarrow l_2 -4 \times l_0  \\ 
+\end{array}
+\end{equation}
+
+Divisons la deuxième ligne par le pivot $a_{11}$ :
+$l_1 \leftarrow {2 \over 3} \times l_1$
+
+\begin{equation}
+A^{(2)}=
+\left(
+\begin{array}{c c c c }
+1  & 0   & -7/3  \\
+0  & 1   & 2/3   \\
+0  & 0  &  4  \\ 
+\end{array}
+\right|
+\left.
+\begin{array}{c}
+{10/3}   \\ {4/3}    \\ -4  \\ 
+\end{array}
+\right)
+\begin{array}{c}
+l_0 \leftarrow  l_0 -{1 \over 2}  \times l_1   \\     \\ l_2 \leftarrow  l_2 -3 \times l_1  \\ 
+\end{array}
+\end{equation}
+
+Divisons la troisième ligne par le pivot $a_{2,2}$ : $l_2 \leftarrow {1 \over 4} \times l_2$
+
+\begin{equation}
+A^{(3)}=
+\left(
+\begin{array}{c c c c }
+1  & 0   & 0  \\
+0  & 1   & 0   \\
+0  & 0  &  1  \\ 
+\end{array}
+\right|
+\left.
+\begin{array}{c}
+1   \\ 2    \\ -1  \\ 
+\end{array}
+\right)
+\begin{array}{c}
+l_0 \leftarrow  l_0 +{7 \over 3}  \times l_2   \\   l_1 \leftarrow  l_1 - {2 \over 3} \times l_2   \\  \\ 
+\end{array}
+\end{equation}
+
+La solution se trouve dans la quatrième colonne. Vérifier que $x=\left(1, 2, -1 \right)^t$ est bien solution.
+
+\subsection{Inverse d'une matrice (niveau **)}
+
+Le calcul direct de l'inverse d'une matrice $A$ mettant en oeuvre la formule
+$A^{-1}= {1 \over det(A)} ^tco(A)$ est peu utilisé en pratique. 
+On préfère résoudre $n$ systèmes linéaires en même temps en plaçant dans le second membre
+la matrice identité $I_n$. On applique la méthode de Gauss-Jordan à la matrice augmentée $(A| I_n)$.
+\\
+
+ $\bullet$ Montrer que l'inverse de la matrice 
+
+$A=\left(
+\begin{array}{c c c }
+2  & 1   & -4  \\
+3  & 3   & -5   \\
+4  & 5  &  -2  \\ 
+\end{array}
+\right)$
+est 
+$A^{-1}= {1 \over 12} \left(
+\begin{array}{c c c }
+19  & -18   & 7  \\
+-14  & 12   & -2   \\
+3  & -6  &  3  \\ 
+\end{array}
+\right)$.
+Vérifier que $A A^{-1}=I$.
+
+\subsection{Implémentation de Gauss-Jordan en Python (niveau *)}
+
+\begin{enumerate} 
+ \item Proposez une implémentation d'une fonction {\tt gauss\_jordan} en python
+ de l'algorithme précédent, permettant de résoudre un système d'équations linéaires.
+ On limitera la précision d'affichage avec l'instruction :
+{\tt numpy.set\_printoptions(precision=4, suppress=True)}.
+L'option {\tt suppress=True} supprime les petits zéros lors de l'affichage.
+ \item Traitez quelques cas tests,  vérifier vos résultats obtenus avec la fonction {\tt numpy.linalg.solve}  
+%\insertlisting{gauss_jordan.m}{Gauss Jordan}
+
+\item On étudie ici la stabilité numérique de l'algorithme en prenant :\\
+$A=\left(
+\begin{array}{c c c c}
+1  & 1/4   &   0 & 0  \\
+1  & 5/4   & 12 & 0   \\
+1  & 1/3  &  1   & 1  \\
+1 & 5/4  & 13  &  1  
+\end{array}
+\right)$
+et $B=\left(
+\begin{array}{c c c c}
+0  \\
+0    \\
+1  \\
+0  
+\end{array}
+\right)$
+
+Calculer le résidu $B-A\; x$ dans ce cas, commenter.
+ 
+\item On émettra une erreur si le pivot $|a_{k,k}|< \epsilon \approx 10^{-6}$.
+Pour ce faire on utilisera l'instruction {\tt raise} dans la fonction{\tt gauss\_jordan} 
+pour lancer une erreur de type {\tt ZeroDivisionError}.
+\begin{lstlisting}[language=Python]
+ if abs(akk)<epsilon:
+    raise ZeroDivisionError("pivot akk trop faible")
+\end{lstlisting}
+
+On récupérera l'erreur de type {\tt ZeroDivisionError} 
+dans le programme appelant en utilisant la structure:
+\begin{lstlisting}[language=Python]
+try:
+    gauss_jordan(K, L)
+except ZeroDivisionError as err:
+    print('Handling run-time error:', err)
+\end{lstlisting}
+
+\end{enumerate}
+ 
+\subsection{Algorithme de Gauss-Jordan avec changement de pivot (niveau **)}
+
+On augmente la matrice $A$ avec le(s) vecteur(s) colonne(s) du second membre.
+On propose une nouvelle version de l'algorithme de Gauss-Jordan
+avec maximisation du pivot.
+L'algorithme est itératif et s'effectue en $n$ étapes. A l'étape $k \in [0, n[$, on
+combine toutes les lignes sauf la ligne k pour faire apparaître des $0$ sur toute
+la colonne $k$ sauf au niveau du pivot $a_{kk}$.
+
+\begin{tabbing}
+\hspace{1cm}\= \hspace{1cm}\= \kill
+pour k=0 à n-1 \\
+\> identifier l'indice de ligne $i \in [k, n[$  correspondant au $\max \{|a_{i,k}|\}$  \\
+\> échanger les lignes $i$ et $k$ de la matrice $A$ \\
+\> diviser ligne $k$ de la nouvelle matrice $A$ par $a_{kk}$ \\
+\> pour i=0 à n-1 sauf k \\
+\> \> retrancher à la ligne i, la nouvelle ligne k multipliée par $a_{ik}$ \\
+\> fin pour i \\
+fin pour k \\
+\end{tabbing}
+ 
+ \begin{enumerate} 
+ \item traiter quelques cas tests.
+ \item refaites l'étude de la stabilité numérique.
+ \end{enumerate}
+ 
+ \subsection{Résolution de systèmes mal conditionnés (niveau **)}
+ 
+ On examine ici l'influence d'une perturbation $\delta b$ sur les termes du second membre $b$
+ du  système d'équations linéaires. Il en résulte une variation $\delta x$ sur la solution.
+ On montre par contre que $\delta x$ n'est pas forcément une perturbation de $x$ et
+ dépend du conditionnement de $A$.
+ On a l'inégalité suivante : 
+ \begin{equation}
+ \frac{\norm {\delta x}}{\norm x} < cond(A) \frac{\norm {\delta b}}{\norm b}
+ \label{conderr}
+ \end{equation}.
+ 
+Le conditionnement est donné dans le cas d'une matrice symétrique
+ par le rapport des valeurs propres  extrèmes en norme de $A$:
+ $\kappa(A) = \frac{|\lambda_{max}(A)|}{|\lambda_{min}(A)|}$.
+ 
+  \begin{enumerate} 
+ \item Résoudre le système d'équations en prenant :
+ $A=\left(
+\begin{array}{c c c c}
+10  & 7   &   8 & 7  \\
+7  &  5   & 6 & 5   \\
+8  &  6  &  10   & 9  \\
+7 & 5  & 9  &  10  
+\end{array}
+\right)$
+et $B=\left(
+\begin{array}{c c c c}
+32  \\
+23   \\
+33  \\
+31 
+\end{array}
+\right)$ 
+ \item Faites une fluctuation de $\pm 1\%$ sur le second membre et en déduire l'erreur
+ sur la solution. 
+ \item Calculer le conditionnement de $A$ à partir de son spectre. On utilisera la
+ fonction \\ {\tt numpy.linalg.eig} pour calculer les valeurs propres.
+ \item Pour vérifier l'inégalité \eqref{conderr},  on calculera les normes avec la fonction
+ {\tt  numpy.linalg.norm} en choisissant une norme infinie, par exemple.
+ \end{enumerate}
+ 
+\section{Décomposition LU d'une matrice avec pivot (niveau ***)}
+
+Le but est ici de décomposer une matrice sous la forme : $A=P\; L\; U$
+où $P$ est une matrice de permutation de lignes de la matrice unité,
+$L$ une matrice triangulaire inférieure ne contenant que des $1$ sur sa diagonale et 
+$U$ une matrice triangulaire supérieure.
+La matrice de permutation est une matrice orthogonale et vérifie la propriété
+$P^{-1}=P^t$.
+
+A titre d'exemple, factorisons la matrice
+ $A=\left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+-3  &  2   & 6   \\
+ 5  &  -1  &  5  
+\end{array}
+\right)$
+
+Déterminons le pivot qui correspond à l'amplitude maximale des termes
+ de la première sous-colonne. La première étape de permutation est triviale 
+ parce que la valeur $10$ est déjà la plus grande valeur. la première
+ matrice de permutation est l'identité. 
+ 
+\begin{equation}
+ P_0\; A^{(0)}=
+ \left(
+\begin{array}{c c c}
+1  & 0   &  0  \\
+0  &  1   & 0  \\
+0  &  0  &  1  
+\end{array}
+\right)
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+-3  &  2   & 6   \\
+ 5  &  -1  &  5  
+\end{array}
+\right)
+=
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+-3  &  2   & 6   \\
+ 5  &  -1  &  5  
+\end{array}
+\right)
+\end{equation}
+
+La première étape d'élimination consiste à faire les combinaisons linéaires suivantes
+-- Numérotation des lignes conformes à python --: 
+ \begin{equation}
+ \begin{array}{c}
+ l_0 \leftarrow l_0 \\
+   l_1 \leftarrow l_1 +3/10 \times l_0   \\ l_2 \leftarrow l_2 -1/2 \times l_0  \\ 
+\end{array}
+\end{equation}
+
+\begin{equation}
+ A^{(1)}=L^{-1}_0 \;  P_0 \; A^{(0)}=
+  \left(
+\begin{array}{c c c}
+1  & 0   &  0  \\
+3/10  &  1   & 0  \\
+-1/2  &  0  &  1  
+\end{array}
+\right)
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+-3  &  2   & 6   \\
+ 5  &  -1  &  5  
+\end{array}
+\right)
+=
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+0  &  -1/10   & 6   \\
+0  &  5/2  &  5  
+\end{array}
+\right)
+\end{equation}
+
+La seconde étape de permutation revient à échanger les lignes $1$ et $2$:
+
+\begin{equation}
+P_1\; A^{(1)}=
+ \left(
+\begin{array}{c c c}
+1  & 0   &  0  \\
+0  &  0   & 1  \\
+0  &  1  &  0  
+\end{array}
+\right)
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+0  &  -1/10   & 6   \\
+0  &  5/2  &  5  
+\end{array}
+\right)
+=
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+0  &  5/2  &  5  \\
+0  &  -1/10   & 6   
+\end{array}
+\right)
+\end{equation}
+
+La seconde étape d'élimination consiste à faire l'opération suivante: 
+\begin{equation}
+ \begin{array}{c}
+  l_2 \leftarrow l_2 +\frac{1}{25} \times l_1 
+\end{array}
+\end{equation}
+
+\begin{equation}
+ U=A^{(2)}=L^{-1}_1 \;  P_1 \; A^{(1)}=
+  \left(
+\begin{array}{c c c}
+1  & 0   &  0  \\
+0  &  1   & 0  \\
+0  &  1/25  &  1  
+\end{array}
+\right)
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+0  &  5/2  &  5  \\
+0  &  -1/10   & 6   
+\end{array}
+\right)
+=
+ \left(
+\begin{array}{c c c}
+10  & -7   &  0  \\
+0  &  5/2   & 5   \\
+0  &  0  &  31/5  
+\end{array}
+\right)
+\end{equation}
+
+\noindent On construit finalement la matrice globale de permutation $P=P_0\; P_1$. \\
+Le calcul des matrices $L_k$ s'effectue facilement grâce à la propriété suivante:
+ \begin{equation}
+ L_k=L_k^{-1}+2I_n
+ \end{equation}
+ La matrice triangulaire inférieure $L$ est finalement reconstruite en appliquant la relation suivante :
+  \begin{equation}
+ L= P^t\;  \Pi_{k=0}^{n-2}  (P_k \; L_k)
+ \end{equation}
+
+ 
+Dans l'algorithme fourni ci-après, on définit une fonction {\tt Find\_Pivot(A, k)}
+qui retourne pour une colonne $k$ donné, l'indice de ligne $i \in [k, n[$  
+correspondant au $\max \{|a_{i,k}|\}$.
+
+\begin{algorithmic}[1]
+   \begin{multicols}{2}
+\Function{LU}{$A$}
+    \State $PL \gets I_n $
+    \State $P \gets I_n $
+    
+    \For{$k \in [0, n-1[$}
+        \State $P_k \gets I_n $
+        \State $i \gets \Call{Find\_Pivot}{$$A, k$$} $
+        \State $P_k \gets \Call{Swap\_Lines}{$$P_k,i, k$$} $
+        \State $A \gets \Call{Swap\_Lines}{$$A,i, k$$} $ \\
+        \State $invL_k \gets I_n$ 
+            \For{$i \in [k+1, n-1[$}
+                    \State $invL_k(i,k) \gets -a_{i,k}/a_{k,k} $
+            \EndFor \\
+        \State $A \gets \Call{Mult}{$$invL_k$, $A$$} $   
+        \State $L_k \gets -invL_k + 2 I_n $
+        \State $PL_k \gets  \Call{Mult}{$$P_k, L_k$$} $
+        \State $PL \gets \Call{Mult}{$$PL, PL_k$$} $    
+        \State $P \gets \Call{Mult}{$$P, P_k$$} $ 
+                 
+      \EndFor\\
+
+      \State $U \gets A $
+      \State $invP \gets \Call{Transpose}{$P$} $
+      \State $L \gets \Call{Mult}{$$invP, PL$$} $ 
+                                
+    \State \Return $P, L, U$
+
+\EndFunction
+\end{multicols}
+\end{algorithmic}
+
+  \begin{enumerate} 
+ \item Proposez une implémentation en python.
+ \item Testez-la en utilisant les matrices fournies précédemment.
+  \end{enumerate} 
+ 
+\end{document}
+

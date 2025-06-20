@@ -1,0 +1,301 @@
+
+\documentclass[a4paper, 12pt]{article}
+\usepackage{a4wide}
+\usepackage {amsmath}
+\usepackage{amssymb}
+\usepackage {graphicx}
+\usepackage[utf8]{inputenc} 
+\usepackage[francais]{babel}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{extramarks}
+\usepackage{chngpage}
+\usepackage{soul}
+\usepackage{algorithmicx} 
+\usepackage{algpseudocode} 
+\usepackage{multicol}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{ifthen}
+\usepackage{listings}
+\usepackage{courier}
+\usepackage{esint}
+\usepackage{bbm}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{epsfig}
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage{braket}
+\usepackage{MnSymbol,wasysym}
+\usepackage{marvosym}
+\usepackage{dsfont}
+\usepackage{stmaryrd}
+
+\lhead{} 
+\chead{} 
+\rhead{\bfseries Fourier et convolution} 
+\lfoot{JC Toussaint - Phelma}
+%\cfoot{} 
+%\rfoot{\thepage}
+
+% This is the color used for MATLAB comments below
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0}
+
+% For faster processing, load Matlab syntax for listings
+\lstloadlanguages{Matlab}%
+\lstset{language=Matlab,                        % Use MATLAB
+        frame=single,                           % Single frame around code
+        basicstyle=\small\ttfamily,             % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf,        % MATLAB functions bold and blue
+        keywordstyle=[2]\color{Purple},         % MATLAB function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar,  % User functions underlined and blue
+        identifierstyle=,                       % Nothing special about identifiers
+                                                % Comments small dark green courier
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small,
+        stringstyle=\color{Purple},             % Strings are purple
+        showstringspaces=false,                 % Don't put marks in string spaces
+        tabsize=5,                              % 5 spaces per tab
+        %
+        %%% Put standard MATLAB functions not included in the default
+        %%% language here
+        morekeywords={xlim,ylim,var,alpha,factorial,poissrnd,normpdf,normcdf},
+        %
+        %%% Put MATLAB function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        %%% Put user defined functions here
+        morekeywords=[3]{FindESS, homework_example},
+        %
+        morecomment=[l][\color{Blue}]{...},     % Line continuation (...) like blue comment
+        numbers=left,                           % Line numbers on left
+        firstnumber=1,                          % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue},          % Line numbers are blue
+        stepnumber=5                            % Line numbers go in steps of 5
+        }
+
+% Includes a MATLAB script.
+% The first parameter is the label, which also is the name of the script
+%   without the .m.
+% The second parameter is the optional caption.
+\newcommand{\matlabscript}[2]
+  {\begin{itemize}\item[]\lstinputlisting[caption=#2,label=#1]{#1.m}\end{itemize}}
+
+\pagestyle{fancy}
+
+\begin{document}
+
+\bibliographystyle{alpha}
+
+\title{Transformée de fourier rapide et convolution}
+
+\author{Jean-Christophe Toussaint
+%  Phelma\\
+%\texttt{jean-christophe.toussaint@phelma.grenoble-inp.fr}
+}
+%\date{\today}
+%\date{\vspace{-10ex}}
+ 
+\maketitle
+
+La technique usuelle pour déterminer les fréquences caractéristiques ainsi que l’amplitude des harmoniques qui composent un signal, consiste à calculer sa transformée de fourier. Dans une approche numérique, cette opération est effectuée sur un ensemble de valeurs échantillonnées.
+
+Le but de l'exercice est dans un premier temps, d'utiliser ici le module scipy.fft pour calculer les transformées de fourier rapides directe et inverse dont la complexité est en $\vartheta(N \ln N)$,
+puis d'effectuer des produits de convolution en utilisant le module scipy.signal.
+
+
+
+\section{Définitions mathématiques}
+
+La transformée directe d'un signal périodique $s$ échantillonné en N points 
+est définie par :
+
+\begin{equation} 
+ft[k]=\sum_{n=0}^{N-1}  s[n] \exp \left(-i \frac{2\pi k}{N}n \right)
+\end{equation} 
+où $k \in  \llbracket  0, N-1 \rrbracket $ avec $i^2=-1$.
+
+Sa transformée inverse est définie par :
+\begin{equation} 
+s[n]=\frac{1}{N} \sum_{k=0}^{N-1}  ft[n] \exp \left(+i \frac{2\pi k}{N}n \right)
+\end{equation}
+
+C'est en 1965 que  James Cooley et John Tukey redécouvrent une méthode de factorisation de ces sommes
+discrètes, déjà imaginée par Gauss en 1805, qui permettent de réduire à $\vartheta(N \ln N)$, le nombre d'opérations.
+Cette technique porte le nom de transformée de fourier rapide (Fast Fourier Transforms).
+
+Le produit de convolution de deux signaux échantillonnés en N points,   est définie par:
+\begin{equation} 
+(f*g)[p]=\sum_{m=0}^{n-1} f_m  . g_{p-m}
+\label{convolution}
+\end{equation}
+
+où $p-m \equiv p-m+n \mod n$
+avec $p \in [0, n[$.
+
+On montre aussi que la transformée de fourier d'un produit de convolution est égale au produit des
+transformées de fourier.
+
+\section{Exercice : transformée de Fourier d'un sinus}
+
+On veut calculer la transformée de fourier discrète d'un signal sinusoïdal périodique $G(t)~=~sin(\frac{2\pi}{T} t)$. On fixera $t \in [0, T[$.
+
+Il est nécessaire d'importer les modules numpy, matplotlib et scipy.fft :
+
+\begin{lstlisting}[language=Python]
+%matplotlib inline
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.fft import fft, fftfreq
+\end{lstlisting}
+
+\begin{enumerate} 
+\item Echantillonner le domaine $ [0, T=1[$ en $N=100$ points en utilisant la fonction numpy
+{\tt np.linspace}. Utiliser la commande help(cmd) pour obtenir une aide en ligne sur tout objet ou
+fonction ou module.
+\item Utiliser les fonctions {\tt fft.fft} et {\tt fft.ifft} pour calculer 
+les transformées directe et inverse.
+\item Tracer le signal et les composantes réelle et imaginaire de sa transformée de fourier.
+\item Vérifier que l'on reconstruit bien le signal initial $G(t)$ en appliquant la transformée inverse 
+sur le spectre de fourier.
+\end{enumerate} 
+
+\section{Exercice : transformée de Fourier d'une gaussienne}
+
+Faites de même sur un signal gaussien $G(t)=\exp(\frac{-t^2}{2 \sigma^2})$.
+On prendra $\sigma=0.1$ et on fixera $t \in [-T/2, T/2[$.
+
+\begin{enumerate} 
+\item Echantillonner le domaine $ [-T/2, T/2[$ en $N=100$ points en utilisant la fonction numpy
+{\tt np.linspace}. 
+\item Avant d'appliquer la transformée de fourier, il est nécessaire de décaler vers la gauche
+le tableau contenant $G$ de $N/2$ cases en utilisant la fonction {\tt np.roll}.
+Une explication vous êtes donnée en annexe I.
+
+%Son origine est liée à la définition de la transformée de fourier fenêtrée:
+%\begin{equation}
+%\hat{f}(\omega)=\int_{-T/2}^{+T/2} s(t) \exp \left(-i \omega t \right) dt
+%\end{equation}
+%
+%avec $\omega_k=\frac{2 \pi}{T} k$ avec  $k \in  \llbracket  0, N-1 \rrbracket $.
+%
+%La discrétisation en temps impose que $t=n T/N -T/2$ avec $n \in  \llbracket  0, N-1 \rrbracket $.
+%On obtient :
+%\begin{equation}
+%\hat{f}(k)= \frac{T}{N} \exp \left(+i \omega_k (T/2) \right)  \sum_{n=0}^{N-1} s[n] \exp \left(-i \frac{2 \pi k}{N} n \right) =
+%\frac{T}{N} \exp \left(+i \omega_k (T/2) \right) fft[k]
+%\end{equation}
+
+
+%$$
+%fft(k)= \frac{T}{N} \sum_{n=0}^{N-1} s(n T/N -T/2) \exp \left(-i \omega_k (n T/N -T/2) \right) 
+%$$
+%
+%$$
+%\hat{f}(k)= \frac{T}{N} \exp \left(+i \omega (T/2) \right)  \sum_{n=0}^{N-1} s[n] \exp \left(-i \omega_k (n T/N) \right) 
+%$$
+%
+%$$
+%\hat{f}(k)= \frac{T}{N} \exp \left(+i \omega_k (T/2) \right)  \sum_{n=0}^{N-1} s[n] \exp \left(-i \frac{2 \pi k}{N} n \right) 
+%$$
+
+\item Utiliser les fonctions {\tt fft.fft} et {\tt fft.ifft} pour calculer 
+les transformées directe et inverse.
+\item Tracer le signal et les composantes réelle et imaginaire de sa transformée de fourier.
+\end{enumerate} 
+
+\section{Convolution de deux signaux}
+ 
+ On définit ci-après un signal carré comme une liste de 1 complétée à droite d'une même quantité de zéros.
+On utilise une méthode de zero-padding pour doubler la taille du tableau tout en le complétant de zéros. 
+Cette technique a peu d'intérêt en 1D mais devient très utile pour les dimensions supérieures à 1.
+ 
+\begin{lstlisting}[language=Python]
+sq=np.ones(5)
+sq=np.pad(sq, (0, len(sq)), mode='constant') # (before, after)
+\end{lstlisting}
+ 
+ \begin{enumerate} 
+\item Développer une fonction python {\tt conv(f, g)} permettant de faire le calcul du produit de convolution discret d'après
+\eqref{convolution}.
+
+\item La fonction {\tt  numpy.convolve(sq, sq, mode='full')} effectue une convolution discrète au sens mathématique.
+Comparer avec le résultat précédent.
+
+\item La fonction {\tt  scipy.ndimage.convolve1d} effectue le calcul du produit de convolution au sens du traitement d'image, sans retournement du noyau, ce qui ne correspond pas à la définition mathématique. Il faut donc retourner le noyau qui est passé en deuxième argument de {\tt convolve1d(sq, sq[::-1], mode='constant', cval=0) }.
+
+\item La fonction {\tt scipy.signal.fftconvolve(sq, sq, mode='full')} du module \break
+{\tt scipy.signal} permet d'obtenir directement le produit de convolution. Le zero-padding sur {\tt sq} est appliqué en interne. 
+
+\item Vérifier que l'on obtient aussi la même résultat en utilisant la propriété sur la transformée de fourier d'un produit de convolution.
+ \end{enumerate} 
+ 
+\section{Convolution d'un signal par une gaussienne}
+
+Dans le cadre d'un modèle simpliste unidimensionnel, on imagine ici qu'une grandeur $\phi$ (nommée ci-après potentiel) est obtenue par 
+le produit de convolution suivant :
+\begin{equation}
+\phi(x)=\int_{-L}^{L} q(y) G(x-y) dy = (q*G) (x)
+\end{equation}
+où $q(x)$ est l'équivalent d'une distribution de charges et $G(x)$ est appelé le noyau.
+Pour fixer les idées, on prendra dans la suite un noyau gaussien $G(x)=\exp(\frac{-x^2}{2 \sigma^2})$, défini partout.
+
+Lorsque la distribution de charges  est la somme de distributions de dirac, $q(x) = \sum_{i} q_i \delta(x-x_i)$, 
+l'expression du potentiel $\phi$ s'écrit comme la somme de gaussiennes centrées en $x_i$:
+
+\begin{equation}
+\phi(x)=\sum_i q_i \exp \left(\frac{-(x-x_i)^2}{2 \sigma^2} \right) 
+\end{equation}
+
+Le but de l'exercice est de reproduire ce résultat, en plaçant les charges $q_i$ aux noeuds $x_i$ d'une grille unidimensionnelle.
+ 
+\begin{enumerate} 
+\item Discrétisée $[-L, L=1]$ en $N=100$ points d'espace en utilisant la fonction {\tt linspace}
+\item Définir le tableau numpy $q$ de dimension $N$ dans lequel on placera quelques charges non nulles.
+\item Défnir le tableau numpy $G$ de dimension $N$ contenant l'échantillonnage de la fonction de Green. On prendra $\sigma=0.1$.
+\item Utiliser d'abord votre propre fonction {\tt conv} calculant le produit de convolution sans optimisation.
+\item Utiliser ensuite {\tt filter.convolve1d(q, G, mode='constant')}. Comparer vos résultats sous la forme de graphiques.
+\end{enumerate} 
+
+
+On désire maintenant développer notre propre routine de convolution, utilisant les FFT du module {\tt fft}.
+Montrer qu'il est nécessaire 
+\begin{enumerate} 
+ \item de mettre en oeuvre la technique du zéro-padding aux tableaux $q$ et $G$. 
+\item d'appliquer sur le tableau $G$ un décalage à gauche de $N/2$ termes. Tracer
+$G$ et commenter.
+\item de calculer les FFT directes sur $q$ et $G$.
+\item d'appliquer une FFT inverse sur leur produit. 
+\item et finalement de ne garder que les N premiers éléments du tableau précédent, pour obtenir le produit de convolution désiré.
+\end{enumerate} 
+
+\section{Annexe I : décalage vers la gauche}
+
+Son origine est liée à la définition de la transformée de fourier fenêtrée:
+\begin{equation}
+\hat{f}(\omega)=\int_{-T/2}^{+T/2} s(t) \exp \left(-i \omega t \right) dt
+\end{equation}
+
+avec $\omega_k=\frac{2 \pi}{T} k$ avec  $k \in  \llbracket  0, N-1 \rrbracket $.
+
+La discrétisation en temps impose que $t=n T/N -T/2$ avec $n \in  \llbracket  0, N-1 \rrbracket $.
+Le pas de temps $dt$ est donc égal à $T/N$.
+
+On obtient :
+\begin{equation}
+\hat{f}(\omega_k)= \frac{T}{N} \exp \left(+i \omega_k (T/2) \right)  \sum_{n=0}^{N-1} s[n] \exp \left(-i \frac{2 \pi k}{N} n \right) =
+\frac{T}{N} \exp \left(+i \omega_k (T/2) \right) ft [k]
+\end{equation}
+
+% 
+% 
+%\begin{equation}
+%\hat{f}(\omega)=\int_{-T/2}^{+T/2} s(t) \exp \left(-i \omega t \right) dt
+%\end{equation}
+       
+% \matlabscript{FDhelmM1etud}{Embryon de programme}
+\end{document}
+

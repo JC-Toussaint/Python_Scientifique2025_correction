@@ -1,0 +1,180 @@
+
+\documentclass[a4paper, 12pt]{article}
+\usepackage{a4wide}
+\usepackage {amsmath}
+\usepackage{amssymb}
+\usepackage {graphicx}
+\usepackage[utf8]{inputenc} 
+\usepackage[francais]{babel}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{extramarks}
+\usepackage{chngpage}
+\usepackage{soul}
+\usepackage{algorithmicx} 
+\usepackage{algpseudocode} 
+\usepackage{multicol}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{ifthen}
+\usepackage{listings}
+\usepackage{courier}
+\usepackage{esint}
+\usepackage{bbm}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{epsfig}
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage{braket}
+\usepackage{MnSymbol,wasysym}
+\usepackage{marvosym}
+\usepackage{dsfont}
+\usepackage{stmaryrd}
+
+\lhead{} 
+\chead{} 
+\rhead{\bfseries Fourier et convolution} 
+\lfoot{JC Toussaint - Phelma}
+%\cfoot{} 
+%\rfoot{\thepage}
+
+% This is the color used for MATLAB comments below
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0}
+
+% For faster processing, load Matlab syntax for listings
+\lstloadlanguages{Matlab}%
+\lstset{language=Matlab,                        % Use MATLAB
+        frame=single,                           % Single frame around code
+        basicstyle=\small\ttfamily,             % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf,        % MATLAB functions bold and blue
+        keywordstyle=[2]\color{Purple},         % MATLAB function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar,  % User functions underlined and blue
+        identifierstyle=,                       % Nothing special about identifiers
+                                                % Comments small dark green courier
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small,
+        stringstyle=\color{Purple},             % Strings are purple
+        showstringspaces=false,                 % Don't put marks in string spaces
+        tabsize=5,                              % 5 spaces per tab
+        %
+        %%% Put standard MATLAB functions not included in the default
+        %%% language here
+        morekeywords={xlim,ylim,var,alpha,factorial,poissrnd,normpdf,normcdf},
+        %
+        %%% Put MATLAB function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        %%% Put user defined functions here
+        morekeywords=[3]{FindESS, homework_example},
+        %
+        morecomment=[l][\color{Blue}]{...},     % Line continuation (...) like blue comment
+        numbers=left,                           % Line numbers on left
+        firstnumber=1,                          % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue},          % Line numbers are blue
+        stepnumber=5                            % Line numbers go in steps of 5
+        }
+
+% Includes a MATLAB script.
+% The first parameter is the label, which also is the name of the script
+%   without the .m.
+% The second parameter is the optional caption.
+\newcommand{\matlabscript}[2]
+  {\begin{itemize}\item[]\lstinputlisting[caption=#2,label=#1]{#1.m}\end{itemize}}
+
+\pagestyle{fancy}
+
+\begin{document}
+
+\bibliographystyle{alpha}
+
+\title{Transformée de fourier rapide et convolution}
+
+\author{Jean-Christophe Toussaint
+%  Phelma\\
+%\texttt{jean-christophe.toussaint@phelma.grenoble-inp.fr}
+}
+%\date{\today}
+%\date{\vspace{-10ex}}
+ 
+\maketitle
+
+\section{Annexe I : décalage vers la gauche}
+
+Son origine est liée à la définition de la transformée de fourier fenêtrée:
+\begin{equation}
+\hat{f}(\omega)=\int_{-T/2}^{+T/2} s(t) \exp \left(-i \omega t \right) dt
+\end{equation}
+
+avec $\omega_k=\frac{2 \pi}{T} k$ avec  $k \in  \llbracket  0, N-1 \rrbracket $.
+
+La discrétisation en temps impose que $t=n T/N -T/2$ avec $n \in  \llbracket  0, N-1 \rrbracket $.
+Le pas de temps $dt$ est donc égal à $T/N$.
+
+On obtient :
+\begin{equation}
+\hat{f}(\omega_k)= \frac{T}{N} \exp \left(+i \omega_k (T/2) \right)  \sum_{n=0}^{N-1} s[n] \exp \left(-i \frac{2 \pi k}{N} n \right) =
+\frac{T}{N} \exp \left(+i \omega_k (T/2) \right) ft [k]
+\end{equation}
+
+\section{Annexe II : produit de convolution}
+
+Son origine est liée à la définition de la transformée de fourier fenêtrée:
+\begin{equation}
+\widehat{f*g}(\omega)=\lim_{L \rightarrow \infty} \int_{-L}^{+L} 
+dy\ \int_{-L}^{+L}  dx\ 
+f(y) g(x-y) \exp \left(-i \omega x \right) 
+\end{equation}
+
+avec $\omega_k=\frac{2 \pi}{T} k$ avec  $k \in  \llbracket  0, N-1 \rrbracket $.
+
+\begin{equation}
+\widehat{f*g}(\omega)=\lim_{L \rightarrow \infty} \int_{-L}^{+L} 
+dy\  f(y)
+\int_{-L}^{+L} dx\ 
+g(x-y) \exp \left(-i \omega x \right) 
+\end{equation}
+
+\begin{equation}
+\widehat{f*g}(\omega)=\lim_{L \rightarrow \infty} \int_{-L}^{+L} 
+dy\  f(y)
+\int_{-L-y}^{+L-y} dx'\
+g(x') \exp \left(-i \omega (x'+y) \right) 
+\end{equation}
+
+$x'=x-y$
+
+\begin{equation}
+\widehat{f*g}(\omega)=\lim_{L \rightarrow \infty} \int_{-L}^{+L} 
+dy\  f(y) \exp \left(-i \omega y \right) 
+\int_{-L-y}^{+L-y} dx'\
+g(x') \exp \left(-i \omega x'\right) 
+\end{equation}
+
+$x'=x-y$
+
+Dans l'hypothèse où $g(x)$ a été périodisée, on obtient:
+\begin{equation}
+\widehat{f*g}(\omega)=\hat{f}(\omega) \ \hat{g}(\omega)
+\end{equation}
+
+%La discrétisation en temps impose que $t=n T/N -T/2$ avec $n \in  \llbracket  0, N-1 \rrbracket $.
+%Le pas de temps $dt$ est donc égal à $T/N$.
+%
+%On obtient :
+%\begin{equation}
+%\hat{f}(\omega_k)= \frac{T}{N} \exp \left(+i \omega_k (T/2) \right)  \sum_{n=0}^{N-1} s[n] \exp \left(-i \frac{2 \pi k}{N} n \right) =
+%\frac{T}{N} \exp \left(+i \omega_k (T/2) \right) ft [k]
+%\end{equation}
+
+% 
+% 
+%\begin{equation}
+%\hat{f}(\omega)=\int_{-T/2}^{+T/2} s(t) \exp \left(-i \omega t \right) dt
+%\end{equation}
+       
+% \matlabscript{FDhelmM1etud}{Embryon de programme}
+\end{document}
+
