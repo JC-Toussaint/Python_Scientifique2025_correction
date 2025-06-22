@@ -52,7 +52,7 @@ class Params:
     Is: float = 1  # Courant de saturation
     Rs: float = 0.1  # Résistance série
     C: float = 0.01  # Capacité
-    tf: float = 200  # Temps final de simulation
+    tf: float = 100  # Temps final de simulation
     period: float = 20  # Période du signal trapézoïdal
     rise_time: float = 5  # Temps de montée du signal
     fall_time: float = 5  # Temps de descente du signal
@@ -228,6 +228,7 @@ class TabWidget(QMainWindow):
             sc.axes.set_ylabel('Iion(t) u(t)')  # Définit le label de l'axe des y
             sc.axes.set_xlim(t_min, t_max)  # Définit les limites de l'axe des x
             sc.axes.set_ylim(y_min, y_max)  # Définit les limites de l'axe des y
+            sc.axes.set_title(method)
             sc.axes.legend()  # Affiche la légende
             sc.axes.grid()  # Affiche une grille
             toolbar = CustomNavigationToolbar(sc, self, method)  # Utilise la barre d'outils personnalisée
